@@ -6,6 +6,8 @@ from pathlib import Path
 from starlette.requests import Request
 from starlette.responses import Response
 
+from backend.routers import yarns
+
 app = FastAPI(title="Wool Stash Tracker")
 
 app.add_middleware(
@@ -15,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(yarns.router)
 
 static_dir = Path(__file__).parent / "static"
 
