@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, Text, Enum, DateTime, func
+from sqlalchemy import Column, Float, Integer, String, Text, Enum, DateTime, func
 from backend.database import Base
 
 
@@ -28,5 +28,9 @@ class Yarn(Base):
     estimated_total_metres = Column(Integer, nullable=True)
     intended_project = Column(String, nullable=True)
     notes = Column(Text, nullable=True)
+    needle_size_mm = Column(Float, nullable=True)
+    tension = Column(String, nullable=True)
+    ball_weight_grams = Column(Integer, nullable=True)
+    image_url = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())

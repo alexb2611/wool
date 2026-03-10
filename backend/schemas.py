@@ -14,6 +14,10 @@ class YarnCreate(BaseModel):
     extra_metres: int | None = None
     intended_project: str | None = None
     notes: str | None = None
+    needle_size_mm: float | None = None
+    tension: str | None = None
+    ball_weight_grams: int | None = None
+    image_url: str | None = None
 
 
 class YarnUpdate(BaseModel):
@@ -27,6 +31,10 @@ class YarnUpdate(BaseModel):
     extra_metres: int | None = None
     intended_project: str | None = None
     notes: str | None = None
+    needle_size_mm: float | None = None
+    tension: str | None = None
+    ball_weight_grams: int | None = None
+    image_url: str | None = None
 
 
 class YarnResponse(BaseModel):
@@ -42,6 +50,10 @@ class YarnResponse(BaseModel):
     estimated_total_metres: int | None
     intended_project: str | None
     notes: str | None
+    needle_size_mm: float | None
+    tension: str | None
+    ball_weight_grams: int | None
+    image_url: str | None
     created_at: datetime
     updated_at: datetime
 

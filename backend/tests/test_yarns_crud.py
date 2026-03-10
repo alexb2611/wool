@@ -134,3 +134,35 @@ def test_delete_yarn(client):
 def test_delete_yarn_not_found(client):
     response = client.delete("/api/yarns/99999")
     assert response.status_code == 404
+
+
+def test_create_yarn_with_new_fields(client):
+    response = client.post("/api/yarns/", json={
+        "name": "Test Yarn",
+        "weight": "DK",
+        "colour": "Red",
+        "fibre": "Wool",
+        "needle_size_mm": 4.5,
+        "tension": "22 sts × 30 rows / 10cm",
+        "ball_weight_grams": 50,
+        "image_url": "https://example.com/yarn.jpg",
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert data["needle_size_mm"] == 4.5
+    assert data["tension"] == "22 sts × 30 rows / 10cm"
+    assert data["ball_weight_grams"] == 50
+    assert data["image_url"] == "https://example.com/yarn.jpg"
+
+
+def test_update_yarn_new_fields(client):
+    created = _create_yarn(client)
+    response = client.put(f"/api/yarns/{created['id']}", json={
+        "needle_size_mm": 5.0,
+        "ball_weight_grams": 100,
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["needle_size_mm"] == 5.0
+    assert data["ball_weight_grams"] == 100
+    assert data["name"] == "Test Yarn"  # unchanged
