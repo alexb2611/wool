@@ -5,7 +5,13 @@ from backend.scrapers.schemas import ScrapedYarn
 
 ScraperFn = Callable[[str], ScrapedYarn]
 
-SCRAPERS: dict[str, ScraperFn] = {}
+from backend.scrapers.lovecrafts import scrape_lovecrafts
+from backend.scrapers.wool_warehouse import scrape_wool_warehouse
+
+SCRAPERS: dict[str, ScraperFn] = {
+    "www.woolwarehouse.co.uk": scrape_wool_warehouse,
+    "www.lovecrafts.com": scrape_lovecrafts,
+}
 
 
 def get_scraper(url: str) -> ScraperFn | None:
