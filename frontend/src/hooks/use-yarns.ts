@@ -69,3 +69,9 @@ export function useSeedYarns() {
     },
   });
 }
+
+export function useScrapeYarn() {
+  return useMutation({
+    mutationFn: (url: string) => yarnsApi.scrapeYarn(url),
+  });
+}

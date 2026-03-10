@@ -13,6 +13,10 @@ export interface Yarn {
   estimated_total_metres: number | null;
   intended_project: string | null;
   notes: string | null;
+  needle_size_mm: number | null;
+  tension: string | null;
+  ball_weight_grams: number | null;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +32,10 @@ export interface YarnCreate {
   extra_metres?: number | null;
   intended_project?: string | null;
   notes?: string | null;
+  needle_size_mm?: number | null;
+  tension?: string | null;
+  ball_weight_grams?: number | null;
+  image_url?: string | null;
 }
 
 export interface YarnUpdate {
@@ -41,6 +49,10 @@ export interface YarnUpdate {
   extra_metres?: number | null;
   intended_project?: string | null;
   notes?: string | null;
+  needle_size_mm?: number | null;
+  tension?: string | null;
+  ball_weight_grams?: number | null;
+  image_url?: string | null;
 }
 
 export interface YarnStats {
@@ -64,4 +76,23 @@ export interface YarnListParams {
 export interface SeedResult {
   created: number;
   skipped: number;
+}
+
+export interface ScrapedColourway {
+  name: string;
+  shade_number: string | null;
+  image_url: string | null;
+}
+
+export interface ScrapedYarn {
+  name: string;
+  weight: string | null;
+  fibre: string | null;
+  metres_per_ball: number | null;
+  ball_weight_grams: number | null;
+  needle_size_mm: number | null;
+  tension: string | null;
+  image_url: string | null;
+  colourways: ScrapedColourway[];
+  source_url: string;
 }

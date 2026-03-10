@@ -1,5 +1,5 @@
 import { request } from "./client";
-import type { Yarn, YarnCreate, YarnUpdate, YarnStats, YarnListParams, SeedResult } from "../types";
+import type { Yarn, YarnCreate, YarnUpdate, YarnStats, YarnListParams, SeedResult, ScrapedYarn } from "../types";
 
 export function listYarns(params?: YarnListParams): Promise<Yarn[]> {
   const searchParams = new URLSearchParams();
@@ -36,4 +36,11 @@ export function getYarnStats(): Promise<YarnStats> {
 
 export function seedYarns(): Promise<SeedResult> {
   return request<SeedResult>("/yarns/seed", { method: "POST" });
+}
+
+export function scrapeYarn(url: string): Promise<ScrapedYarn> {
+  return request<ScrapedYarn>("/yarns/scrape", {
+    method: "POST",
+    body: JSON.stringify({ url }),
+  });
 }
