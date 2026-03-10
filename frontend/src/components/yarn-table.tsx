@@ -101,22 +101,49 @@ export function YarnTable({ yarns, onEdit, onDelete }: YarnTableProps) {
                   <TableCell />
                   <TableCell colSpan={7}>
                     <div className="py-2 flex flex-col gap-2 text-sm text-stone-700">
-                      <div className="grid grid-cols-2 gap-x-8 gap-y-1 sm:grid-cols-4">
-                        <div>
-                          <span className="text-stone-500">Metres per ball: </span>
-                          {yarn.metres_per_ball != null ? `${yarn.metres_per_ball}m` : "—"}
-                        </div>
-                        <div>
-                          <span className="text-stone-500">Extra metres: </span>
-                          {yarn.extra_metres != null ? `${yarn.extra_metres}m` : "—"}
-                        </div>
-                        <div>
-                          <span className="text-stone-500">Added: </span>
-                          {formatDate(yarn.created_at)}
-                        </div>
-                        <div>
-                          <span className="text-stone-500">Updated: </span>
-                          {formatDate(yarn.updated_at)}
+                      <div className="flex items-start gap-4">
+                        {yarn.image_url && (
+                          <img
+                            src={yarn.image_url}
+                            alt={yarn.name}
+                            className="size-20 rounded border border-stone-200 object-cover flex-shrink-0"
+                          />
+                        )}
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-1 sm:grid-cols-4 flex-1">
+                          <div>
+                            <span className="text-stone-500">Metres per ball: </span>
+                            {yarn.metres_per_ball != null ? `${yarn.metres_per_ball}m` : "—"}
+                          </div>
+                          {yarn.ball_weight_grams != null && (
+                            <div>
+                              <span className="text-stone-500">Ball weight: </span>
+                              {yarn.ball_weight_grams}g
+                            </div>
+                          )}
+                          {yarn.needle_size_mm != null && (
+                            <div>
+                              <span className="text-stone-500">Needle size: </span>
+                              {yarn.needle_size_mm}mm
+                            </div>
+                          )}
+                          {yarn.tension && (
+                            <div>
+                              <span className="text-stone-500">Tension: </span>
+                              {yarn.tension}
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-stone-500">Extra metres: </span>
+                            {yarn.extra_metres != null ? `${yarn.extra_metres}m` : "—"}
+                          </div>
+                          <div>
+                            <span className="text-stone-500">Added: </span>
+                            {formatDate(yarn.created_at)}
+                          </div>
+                          <div>
+                            <span className="text-stone-500">Updated: </span>
+                            {formatDate(yarn.updated_at)}
+                          </div>
                         </div>
                       </div>
                       {yarn.notes && (
