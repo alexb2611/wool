@@ -85,25 +85,25 @@ def parse_wool_warehouse(html: str, url: str) -> ScrapedYarn:
     # Yarn weight category from specs table
     weight = _get_spec(spec_table, "Yarn Weight")
 
-    # Colourways from dropdown
+    # Colourways from the hidden swatch grid (includes per-colour images)
     colourways: list[ScrapedColourway] = []
-    select = soup.find("select", id="subprod_colourdropdown")
-    if select:
-        for option in select.find_all("option"):
-            text = option.get_text(strip=True)
-            if not text or text.lower() in ("all colours", ""):
-                continue
-            shade_match = re.match(r"^(\d+)\s+(.+)$", text)
-            if shade_match:
-                colourways.append(ScrapedColourway(
-                    name=shade_match.group(2).strip(),
-                    shade_number=shade_match.group(1),
-                    image_url=None,
-                ))
-            else:
-                colourways.append(ScrapedColourway(
-                    name=text, shade_number=None, image_url=None,
-                ))
+    for li in soup.find_all("li", class_="more-colours-li"):
+        caption = li.find("div", class_="colourcaption")
+        if not caption:
+            continue
+        spans = caption.find_all("span")
+        # Structure: <span>01</span><span> - </span><span>Off White Uni</span>
+        shade_number = spans[0].get_text(strip=True) if len(spans) >= 1 else None
+        colour_name = spans[2].get_text(strip=True) if len(spans) >= 3 else None
+        if not colour_name:
+            continue
+        swatch_img = li.find("img", class_="shadecard-img")
+        swatch_url = swatch_img["src"] if swatch_img and swatch_img.get("src") else None
+        colourways.append(ScrapedColourway(
+            name=colour_name,
+            shade_number=shade_number,
+            image_url=swatch_url,
+        ))
 
     # Main product image from div#imageGallery
     image_url = None
