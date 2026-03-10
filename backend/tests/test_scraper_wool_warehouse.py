@@ -52,6 +52,13 @@ def test_parse_colourways():
     assert any("Pearl Grey" in n for n in names)
 
 
+def test_parse_colourway_images():
+    result = parse_wool_warehouse(FIXTURE.read_text(), URL)
+    with_images = [c for c in result.colourways if c.image_url]
+    assert len(with_images) == len(result.colourways)
+    assert all(c.image_url.startswith("http") for c in with_images)
+
+
 def test_parse_image():
     result = parse_wool_warehouse(FIXTURE.read_text(), URL)
     assert result.image_url is not None
