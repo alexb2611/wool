@@ -6,7 +6,7 @@ A locally-hosted web application for cataloguing a personal wool/yarn stash, rep
 
 ## Context
 
-Helen maintains a spreadsheet of ~33 yarns. The app provides a searchable, filterable interface for browsing the collection, planning projects, and tracking quantities. It will be deployed on an Ubuntu server (192.168.5.153:8001) alongside Model Mate (port 8000).
+Helen maintains a spreadsheet of ~34 yarns. The app provides a searchable, filterable interface for browsing the collection, planning projects, and tracking quantities. It will be deployed on an Ubuntu server (192.168.5.153:8001) alongside Model Mate (port 8000).
 
 ## Tech Stack
 
@@ -136,7 +136,7 @@ Warm, crafty feel — soft teals and warm neutrals. Weight badges use distinct c
 
 ## Seed Data
 
-- 33 yarns from Helen's spreadsheet hardcoded as a Python list of dicts
+- 34 yarns from Helen's spreadsheet hardcoded as a Python list of dicts
 - `POST /api/yarns/seed` imports them with free-text quantity mappings per the brief
 - Idempotent: skips entries matching on name + colour + weight combination
 - No runtime Excel dependency
