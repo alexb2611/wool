@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Yarn, YarnWeight
 from backend.schemas import StatsResponse, YarnCreate, YarnResponse, YarnUpdate
+from backend.scrapers import SCRAPERS, get_scraper
+from backend.scrapers.schemas import ScrapeRequest
 
 router = APIRouter(prefix="/api/yarns", tags=["yarns"])
 
@@ -129,6 +131,25 @@ def seed_yarns(db: Session = Depends(get_db)):
         created += 1
     db.commit()
     return {"created": created, "skipped": skipped}
+
+
+# 4.5 POST /scrape — must be before /{yarn_id} parameterised routes
+@router.post("/scrape")
+def scrape_yarn(req: ScrapeRequest):
+    scraper = get_scraper(req.url)
+    if not scraper:
+        supported = ", ".join(sorted(SCRAPERS.keys()))
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported URL. Supported sites: {supported}",
+        )
+    try:
+        return scraper(req.url)
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to scrape URL: {str(e)}",
+        )
 
 
 # 5. GET /{yarn_id}
