@@ -9,7 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <p className="text-sm text-stone-500">Helen's yarn catalogue</p>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+      <main className="px-4 py-6">{children}</main>
     </div>
   );
 }
