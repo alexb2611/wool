@@ -162,6 +162,49 @@ export function YarnTable({ yarns, onEdit, onDelete }: YarnTableProps) {
                           </div>
                         </div>
                       </div>
+                      {yarn.pattern_name && (
+                        <div className="flex items-start gap-3 rounded-md border border-stone-200 bg-white p-3">
+                          {yarn.pattern_image_url && (
+                            <img
+                              src={yarn.pattern_image_url}
+                              alt={yarn.pattern_name}
+                              className="size-20 rounded border border-stone-200 object-cover flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex flex-col gap-0.5 text-sm">
+                            <span className="font-medium">
+                              {yarn.ravelry_url ? (
+                                <a
+                                  href={yarn.ravelry_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {yarn.pattern_name}
+                                </a>
+                              ) : (
+                                yarn.pattern_name
+                              )}
+                            </span>
+                            {yarn.pattern_author && (
+                              <span className="text-stone-500">
+                                by {yarn.pattern_author}
+                              </span>
+                            )}
+                            {yarn.pattern_suggested_yarn && (
+                              <span className="text-stone-500">
+                                Yarn: {yarn.pattern_suggested_yarn}
+                              </span>
+                            )}
+                            {yarn.pattern_yarn_weight && (
+                              <span className="text-stone-500">
+                                Weight: {yarn.pattern_yarn_weight}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       {yarn.notes && (
                         <div>
                           <span className="text-stone-500">Notes: </span>
