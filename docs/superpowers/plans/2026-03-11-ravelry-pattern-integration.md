@@ -416,7 +416,8 @@ def test_create_yarn_survives_scrape_failure(client):
 
 
 def test_update_yarn_clears_pattern_fields(client):
-    with patch("backend.routers.yarns.scrape_ravelry", return_value=MOCK_PATTERN):
+    with patch("backend.routers.yarns.scrape_ravelry", return_value=MOCK_PATTERN), \
+         patch("backend.routers.yarns._download_image", return_value="cleanup_test.jpg"):
         resp = _create_yarn(
             client,
             ravelry_url="https://www.ravelry.com/patterns/library/skyler-5",
@@ -431,7 +432,7 @@ def test_update_yarn_clears_pattern_fields(client):
     assert data["pattern_name"] is None
     assert data["pattern_author"] is None
     assert data["pattern_image_url"] is None
-    mock_delete.assert_called_once()
+    mock_delete.assert_called_once_with("cleanup_test.jpg")
 
 
 def test_update_yarn_changes_pattern(client):
