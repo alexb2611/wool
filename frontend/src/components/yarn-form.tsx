@@ -56,6 +56,7 @@ export function YarnForm({
   const [imageUrl, setImageUrl] = useState(initialData?.image_url ?? "");
   const [intendedProject, setIntendedProject] = useState(initialData?.intended_project ?? "");
   const [notes, setNotes] = useState(initialData?.notes ?? "");
+  const [ravelryUrl, setRavelryUrl] = useState(initialData?.ravelry_url ?? "");
 
   const scrape = useScrapeYarn();
 
@@ -110,6 +111,7 @@ export function YarnForm({
       image_url: imageUrl.trim() || null,
       intended_project: intendedProject.trim() || null,
       notes: notes.trim() || null,
+      ravelry_url: ravelryUrl.trim() || null,
     };
     onSubmit(data);
   }
@@ -353,6 +355,17 @@ export function YarnForm({
             value={intendedProject}
             onChange={(e) => setIntendedProject(e.target.value)}
             placeholder="e.g. Helen's cardigan"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5 sm:col-span-2">
+          <Label htmlFor="yarn-ravelry-url">Ravelry pattern URL</Label>
+          <Input
+            id="yarn-ravelry-url"
+            type="url"
+            value={ravelryUrl}
+            onChange={(e) => setRavelryUrl(e.target.value)}
+            placeholder="https://www.ravelry.com/patterns/library/..."
           />
         </div>
 

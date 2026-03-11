@@ -17,6 +17,13 @@ export interface Yarn {
   tension: string | null;
   ball_weight_grams: number | null;
   image_url: string | null;
+  ravelry_url: string | null;
+  pattern_name: string | null;
+  pattern_author: string | null;
+  pattern_suggested_yarn: string | null;
+  pattern_yarn_weight: string | null;
+  pattern_image_filename: string | null;
+  pattern_image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +43,7 @@ export interface YarnCreate {
   tension?: string | null;
   ball_weight_grams?: number | null;
   image_url?: string | null;
+  ravelry_url?: string | null;
 }
 
 export interface YarnUpdate {
@@ -53,6 +61,7 @@ export interface YarnUpdate {
   tension?: string | null;
   ball_weight_grams?: number | null;
   image_url?: string | null;
+  ravelry_url?: string | null;
 }
 
 export interface YarnStats {

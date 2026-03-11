@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from backend.models import YarnWeight
 
 
@@ -18,6 +18,7 @@ class YarnCreate(BaseModel):
     tension: str | None = None
     ball_weight_grams: int | None = None
     image_url: str | None = None
+    ravelry_url: str | None = None
 
 
 class YarnUpdate(BaseModel):
@@ -35,6 +36,7 @@ class YarnUpdate(BaseModel):
     tension: str | None = None
     ball_weight_grams: int | None = None
     image_url: str | None = None
+    ravelry_url: str | None = None
 
 
 class YarnResponse(BaseModel):
@@ -54,6 +56,20 @@ class YarnResponse(BaseModel):
     tension: str | None
     ball_weight_grams: int | None
     image_url: str | None
+    ravelry_url: str | None
+    pattern_name: str | None
+    pattern_author: str | None
+    pattern_suggested_yarn: str | None
+    pattern_yarn_weight: str | None
+    pattern_image_filename: str | None
+
+    @computed_field
+    @property
+    def pattern_image_url(self) -> str | None:
+        if self.pattern_image_filename:
+            return f"/api/pattern-images/{self.pattern_image_filename}"
+        return None
+
     created_at: datetime
     updated_at: datetime
 

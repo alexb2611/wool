@@ -1,5 +1,10 @@
+import logging
+import re
 from collections import Counter
+from pathlib import Path
+from uuid import uuid4
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -8,7 +13,59 @@ from backend.database import get_db
 from backend.models import Yarn, YarnWeight
 from backend.schemas import StatsResponse, YarnCreate, YarnResponse, YarnUpdate
 from backend.scrapers import SCRAPERS, get_scraper
+from backend.scrapers.ravelry import scrape_ravelry
 from backend.scrapers.schemas import ScrapeRequest
+
+logger = logging.getLogger(__name__)
+
+RAVELRY_URL_PATTERN = re.compile(
+    r"^https?://(www\.)?ravelry\.com/patterns/library/.+"
+)
+
+PATTERN_IMAGES_DIR = Path(__file__).parent.parent.parent / "data" / "pattern_images"
+
+
+def _download_image(image_url: str) -> str | None:
+    """Download an image and return the saved filename, or None on failure."""
+    try:
+        resp = httpx.get(image_url, follow_redirects=True, timeout=15.0,
+                         headers={"User-Agent": "WoolStashTracker/1.0"})
+        resp.raise_for_status()
+        content_type = resp.headers.get("content-type", "")
+        ext = ".jpg"
+        if "png" in content_type:
+            ext = ".png"
+        elif "webp" in content_type:
+            ext = ".webp"
+        filename = f"{uuid4().hex}{ext}"
+        PATTERN_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+        (PATTERN_IMAGES_DIR / filename).write_bytes(resp.content)
+        return filename
+    except Exception:
+        logger.warning("Failed to download pattern image from %s", image_url, exc_info=True)
+        return None
+
+
+def _delete_pattern_image(filename: str | None) -> None:
+    """Delete a pattern image file if it exists."""
+    if not filename:
+        return
+    path = (PATTERN_IMAGES_DIR / filename).resolve()
+    if path.is_relative_to(PATTERN_IMAGES_DIR.resolve()) and path.is_file():
+        path.unlink()
+
+
+_PATTERN_FIELDS = (
+    "pattern_name", "pattern_author", "pattern_suggested_yarn",
+    "pattern_yarn_weight", "pattern_image_filename",
+)
+
+
+def _clear_pattern_fields(data: dict) -> None:
+    """Set all pattern metadata fields to None."""
+    for field in _PATTERN_FIELDS:
+        data[field] = None
+
 
 router = APIRouter(prefix="/api/yarns", tags=["yarns"])
 
@@ -26,7 +83,25 @@ def _compute_estimated_metres(yarn: Yarn) -> int | None:
 # 1. POST / (create)
 @router.post("/", response_model=YarnResponse, status_code=201)
 def create_yarn(yarn_in: YarnCreate, db: Session = Depends(get_db)):
-    yarn = Yarn(**yarn_in.model_dump())
+    data = yarn_in.model_dump()
+
+    ravelry_url = data.get("ravelry_url")
+    if ravelry_url and not RAVELRY_URL_PATTERN.match(ravelry_url):
+        raise HTTPException(status_code=422, detail="Invalid Ravelry URL. Expected: https://www.ravelry.com/patterns/library/...")
+
+    if ravelry_url:
+        try:
+            pattern = scrape_ravelry(ravelry_url)
+            data["pattern_name"] = pattern.name
+            data["pattern_author"] = pattern.author
+            data["pattern_suggested_yarn"] = pattern.suggested_yarn
+            data["pattern_yarn_weight"] = pattern.yarn_weight
+            if pattern.image_url:
+                data["pattern_image_filename"] = _download_image(pattern.image_url)
+        except Exception:
+            logger.warning("Failed to scrape Ravelry URL: %s", ravelry_url, exc_info=True)
+
+    yarn = Yarn(**data)
     yarn.estimated_total_metres = _compute_estimated_metres(yarn)
     db.add(yarn)
     db.commit()
@@ -57,6 +132,8 @@ def list_yarns(
                 Yarn.fibre.ilike(f"%{q}%"),
                 Yarn.intended_project.ilike(f"%{q}%"),
                 Yarn.notes.ilike(f"%{q}%"),
+                Yarn.pattern_name.ilike(f"%{q}%"),
+                Yarn.pattern_author.ilike(f"%{q}%"),
             )
         )
 
@@ -167,7 +244,36 @@ def update_yarn(yarn_id: int, yarn_in: YarnUpdate, db: Session = Depends(get_db)
     yarn = db.query(Yarn).filter(Yarn.id == yarn_id).first()
     if not yarn:
         raise HTTPException(status_code=404, detail="Yarn not found")
-    for field, value in yarn_in.model_dump(exclude_unset=True).items():
+
+    update_data = yarn_in.model_dump(exclude_unset=True)
+
+    if "ravelry_url" in update_data:
+        new_url = update_data["ravelry_url"]
+
+        if new_url and not RAVELRY_URL_PATTERN.match(new_url):
+            raise HTTPException(status_code=422, detail="Invalid Ravelry URL. Expected: https://www.ravelry.com/patterns/library/...")
+
+        if new_url != yarn.ravelry_url:
+            old_image = yarn.pattern_image_filename
+            if new_url:
+                try:
+                    pattern = scrape_ravelry(new_url)
+                    update_data["pattern_name"] = pattern.name
+                    update_data["pattern_author"] = pattern.author
+                    update_data["pattern_suggested_yarn"] = pattern.suggested_yarn
+                    update_data["pattern_yarn_weight"] = pattern.yarn_weight
+                    if pattern.image_url:
+                        update_data["pattern_image_filename"] = _download_image(pattern.image_url)
+                    else:
+                        update_data["pattern_image_filename"] = None
+                except Exception:
+                    logger.warning("Failed to scrape Ravelry URL: %s", new_url, exc_info=True)
+                    _clear_pattern_fields(update_data)
+            else:
+                _clear_pattern_fields(update_data)
+            _delete_pattern_image(old_image)
+
+    for field, value in update_data.items():
         setattr(yarn, field, value)
     yarn.estimated_total_metres = _compute_estimated_metres(yarn)
     db.commit()
@@ -181,5 +287,6 @@ def delete_yarn(yarn_id: int, db: Session = Depends(get_db)):
     yarn = db.query(Yarn).filter(Yarn.id == yarn_id).first()
     if not yarn:
         raise HTTPException(status_code=404, detail="Yarn not found")
+    _delete_pattern_image(yarn.pattern_image_filename)
     db.delete(yarn)
     db.commit()

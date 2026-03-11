@@ -33,5 +33,14 @@ async def serve_spa(request: Request, call_next) -> Response:
     return response
 
 
+# Pattern images directory
+pattern_images_dir = Path(__file__).parent.parent / "data" / "pattern_images"
+pattern_images_dir.mkdir(parents=True, exist_ok=True)
+app.mount(
+    "/api/pattern-images",
+    StaticFiles(directory=str(pattern_images_dir)),
+    name="pattern-images",
+)
+
 if static_dir.is_dir():
     app.mount("/", StaticFiles(directory=str(static_dir)), name="static")
