@@ -50,9 +50,21 @@ def _delete_pattern_image(filename: str | None) -> None:
     """Delete a pattern image file if it exists."""
     if not filename:
         return
-    path = PATTERN_IMAGES_DIR / filename
-    if path.is_file():
+    path = (PATTERN_IMAGES_DIR / filename).resolve()
+    if path.is_relative_to(PATTERN_IMAGES_DIR.resolve()) and path.is_file():
         path.unlink()
+
+
+_PATTERN_FIELDS = (
+    "pattern_name", "pattern_author", "pattern_suggested_yarn",
+    "pattern_yarn_weight", "pattern_image_filename",
+)
+
+
+def _clear_pattern_fields(data: dict) -> None:
+    """Set all pattern metadata fields to None."""
+    for field in _PATTERN_FIELDS:
+        data[field] = None
 
 
 router = APIRouter(prefix="/api/yarns", tags=["yarns"])
@@ -256,17 +268,9 @@ def update_yarn(yarn_id: int, yarn_in: YarnUpdate, db: Session = Depends(get_db)
                         update_data["pattern_image_filename"] = None
                 except Exception:
                     logger.warning("Failed to scrape Ravelry URL: %s", new_url, exc_info=True)
-                    update_data["pattern_name"] = None
-                    update_data["pattern_author"] = None
-                    update_data["pattern_suggested_yarn"] = None
-                    update_data["pattern_yarn_weight"] = None
-                    update_data["pattern_image_filename"] = None
+                    _clear_pattern_fields(update_data)
             else:
-                update_data["pattern_name"] = None
-                update_data["pattern_author"] = None
-                update_data["pattern_suggested_yarn"] = None
-                update_data["pattern_yarn_weight"] = None
-                update_data["pattern_image_filename"] = None
+                _clear_pattern_fields(update_data)
             _delete_pattern_image(old_image)
 
     for field, value in update_data.items():
