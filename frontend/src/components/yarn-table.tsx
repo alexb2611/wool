@@ -61,6 +61,7 @@ export function YarnTable({ yarns, onEdit, onDelete }: YarnTableProps) {
           <TableHead>Quantity</TableHead>
           <TableHead>Est. Metres</TableHead>
           <TableHead className="hidden md:table-cell">Project</TableHead>
+          <TableHead className="hidden lg:table-cell">Pattern</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -95,11 +96,26 @@ export function YarnTable({ yarns, onEdit, onDelete }: YarnTableProps) {
                 <TableCell className="hidden md:table-cell">
                   {yarn.intended_project ?? "—"}
                 </TableCell>
+                <TableCell className="hidden lg:table-cell">
+                  {yarn.pattern_name && yarn.ravelry_url ? (
+                    <a
+                      href={yarn.ravelry_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {yarn.pattern_name}
+                    </a>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
               </TableRow>
               {isExpanded && (
                 <TableRow key={`${yarn.id}-expanded`} className="bg-stone-50 hover:bg-stone-50">
                   <TableCell />
-                  <TableCell colSpan={7}>
+                  <TableCell colSpan={8}>
                     <div className="py-2 flex flex-col gap-2 text-sm text-stone-700">
                       <div className="flex items-start gap-4">
                         {yarn.image_url && (
