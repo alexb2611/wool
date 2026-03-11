@@ -22,3 +22,12 @@ class ScrapedYarn(BaseModel):
     image_url: str | None = None
     colourways: list[ScrapedColourway] = []
     source_url: str
+
+
+class ScrapedPattern(BaseModel):
+    name: str | None = None
+    author: str | None = None
+    suggested_yarn: str | None = None
+    yarn_weight: str | None = None
+    image_url: str | None = None
+    source_url: str
